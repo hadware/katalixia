@@ -86,9 +86,9 @@ class RhymeTree(TreeNode):
 
     def insert_rhyme(self, rhyme_string, data=None):
         new_leaf = Leaf.from_string(rhyme_string.strip(), self.voice)
-        if data is not None:
-            new_leaf.data = data
         if new_leaf is not None:
+            if data is not None:
+                new_leaf.data = data
             self.insert(new_leaf, 1)
         else:
             logging.warning("Couldn't insert empty word")
