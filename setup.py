@@ -10,7 +10,7 @@ if os.path.exists('README.rst'):
 
 setup(
     name='katalixia',
-    version='0.1.0',
+    version='0.1.1',
     description='A lib to rhyme',
     url='https://github.com/hadware/katalixia',
     author='Hadware',
