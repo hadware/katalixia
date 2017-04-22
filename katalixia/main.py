@@ -12,7 +12,7 @@ from katalixia.tools import weighted_choice
 class TreeNode:
 
     def __init__(self):
-        self.children = dict() # type:Dict[str,TreeNode]
+        self.children = dict() # type:Dict[str,Union[TreeNode, Leaf]]
         self.leaves = list() # type:List[Leaf]
         self.child_leaves_count = 0
 
@@ -53,24 +53,26 @@ class TreeNode:
         else:
             children_list, weights = zip(*[(child, child.total_leaves_count) for child in self.children.values()])
             rnd_child = weighted_choice(children_list, weights)
-            if isinstance(rnd_child, Leaf):
-                return rnd_child
-            else:
-                return rnd_child.find_random()
+            return rnd_child.find_random()
 
-    def find(self, phoneme_list: PhonemeList):
+    def find(self, phoneme_list: PhonemeList, original_string : str):
+        """Recursively, through the tree, tries to find a good rhyme that is *not* equal to the input word
+        (here passed as an argument in original string"""
         if not phoneme_list:
             return self.find_random()
+
+        current_pho = phoneme_list.pop()
+        if current_pho in self.children:
+            current_child = self.children[current_pho]
+            curr_child_output = current_child.find(phoneme_list, original_string)
+            if curr_child_output is not None:
+                return curr_child_output
+
+        rnd_child = self.find_random()
+        if isinstance(rnd_child, Leaf) and rnd_child.text == original_string:
+            return None
         else:
-            current_pho = phoneme_list.pop()
-            if current_pho in self.children:
-                current_child = self.children[current_pho]
-                if isinstance(current_child, Leaf):
-                    return current_child
-                else:
-                    return current_child.find(phoneme_list)
-            else:
-                return self.find_random()
+            return rnd_child #nothing worked
 
     def to_dict(self):
         return {"children": {pho: child.to_dict() for pho, child in self.children.items()},
@@ -91,7 +93,7 @@ class RhymeTree(TreeNode):
                 new_leaf.data = data
             self.insert(new_leaf, 1)
         else:
-            logging.warning("Couldn't insert empty word")
+            logging.warning("Word '%s' returned empty phoneme" % rhyme_string)
 
     def find_rhyme(self, string):
         string_phonemes = Leaf.clean_silences([pho.name for pho in self.voice.to_phonemes(string)])
@@ -99,7 +101,7 @@ class RhymeTree(TreeNode):
         if current_pho not in self.children:
             return None
         else:
-            return self.children[current_pho].find(string_phonemes)
+            return self.children[current_pho].find(string_phonemes, string)
 
     def save(self, filepath):
         with open(filepath, "wb") as picklefile:
@@ -160,3 +162,9 @@ class Leaf:
 
     def to_dict(self):
         return self.text
+
+    def find(self, phoneme_list: PhonemeList, original_string : str):
+        return self if original_string != self.text else None
+
+    def find_random(self):
+        return self
