@@ -149,7 +149,7 @@ class Leaf:
 
     @staticmethod
     def clean_silences(phoneme_list):
-        while phoneme_list[-1] == "_":
+        while phoneme_list and phoneme_list[-1] == "_":
             phoneme_list.pop()
         return phoneme_list
 
