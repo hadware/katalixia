@@ -10,7 +10,7 @@ if os.path.exists('README.rst'):
 
 setup(
     name='katalixia',
-    version='0.1.1',
+    version='0.1.2',
     description='A lib to rhyme',
     url='https://github.com/hadware/katalixia',
     author='Hadware',
@@ -26,7 +26,7 @@ setup(
     ],
     keywords='rhyme phonems language',
     packages=find_packages(),
-    install_requires=['voxpopuli'],
+    install_requires=['voxpopuli', 'distance'],
     include_package_data=True,
     test_suite='nose.collector',
     tests_require=['nose'])

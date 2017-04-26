@@ -5,6 +5,7 @@ import random
 from voxpopuli import Voice, PhonemeList
 from typing import Union, Dict, List
 from random import randint
+from distance import levenshtein
 
 from katalixia.tools import weighted_choice
 
@@ -69,7 +70,7 @@ class TreeNode:
                 return curr_child_output
 
         rnd_child = self.find_random()
-        if isinstance(rnd_child, Leaf) and rnd_child.text == original_string:
+        if isinstance(rnd_child, Leaf) and levenshtein(seq1=original_string, seq2=rnd_child.text) <= 2:
             return None
         else:
             return rnd_child #nothing worked
@@ -164,7 +165,7 @@ class Leaf:
         return self.text
 
     def find(self, phoneme_list: PhonemeList, original_string : str):
-        return self if original_string != self.text else None
+        return self if levenshtein(seq1=original_string, seq2=self.text) >= 2 else None
 
     def find_random(self):
         return self
